@@ -1,0 +1,10 @@
+dist/
+package.json
+node_modules/
+package.lock.json
+tsconfig.build.json
+
+# OS generated files #
+.DS_Store
+Thumbs.db
+.tmp/
