@@ -7,7 +7,16 @@ import process from 'process';
 import { Persona } from './interfaces/Persona';
 import { Genero } from './interfaces/Genero';
 import { Auto } from './interfaces/Auto';
-import { buscarPersonas } from './services/personaService';
+import {
+    borrarPersona,
+    buscarPersona,
+    buscarPersonas,
+    editarPersona,
+    esDatoValido,
+    esFechaValida,
+    sonDatosValidos
+} from './services/personaService';
+import { buscarAutos } from './services/autoService';
 
 const auto1: Auto = {
     marca: 'Ford',
@@ -67,31 +76,57 @@ app.use(bodyParser.json());
 
 // Browse
 app.get('/', (req, res) => {
-    const reqQueryParam = req.query;
-    const resData = {
-        personas: buscarPersonas(personas)
-    };
+    let resData = {};
+    const dniPersona = req.query.dni?.toString();
+    if (req.query.dni) {
+        resData = { autos: buscarAutos(dniPersona!, personas) };
+    } else {
+        resData = { personas: buscarPersonas(personas) };
+    }
     res.json(resData);
 });
 
 // Read
-app.get('/persona', (req, res) => {
-    console.log('lalala');
+app.get('/personas/:dni', (req, res) => {
+    const dni = req.params.dni;
+    let personaEncontrada: Persona | undefined = undefined;
+    if (dni) {
+        personaEncontrada = buscarPersona(dni, personas);
+    }
+    if (personaEncontrada === undefined) {
+        res.status(404).send(`No existe persona con el DNI: ${dni}`);
+    } else {
+        res.json(personaEncontrada);
+    }
 });
 
 // Edit
-app.put('/persona', (req, res) => {
-    console.log('asd');
+app.put('/personas/:dni', (req, res) => {
+    const personaId = req.params.dni;
+    const reqData: Partial<Persona> = req.body;
+    const personaEditada = editarPersona(personaId, reqData, personas);
+    if (sonDatosValidos(reqData)) {
+        res.status(201).send(personaEditada);
+    }
+    if (!sonDatosValidos(reqData)) {
+        res.status(400).send('No se puede editar la persona');
+    }
+    if (personaEditada === undefined) {
+        res.status(404).send(`No existe persona con el DNI: ${personaId}`);
+    }
 });
 
 // Add
-app.post('/persona', (req, res) => {
-    console.log('sdfsdf');
+app.post('/personas', (req, res) => {
+    const newPersona: Persona = { ...req.body };
+    personas.push(newPersona);
+    res.status(201).json(newPersona.dni);
 });
 
 // Delete
-app.delete('/persona', (req, res) => {
-    console.log('asdasd');
+app.delete('/personas/:dni', (req, res) => {
+    const personaDni = req.params.dni;
+    borrarPersona(personaDni, personas);
 });
 
 // Levantamos el servidor en el puerto que configuramos

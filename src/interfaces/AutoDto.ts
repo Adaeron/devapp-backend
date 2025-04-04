@@ -1,4 +1,4 @@
-export interface AutoResponse {
+export interface AutoDto {
     marca: string;
     modelo: string;
     patente: string;
