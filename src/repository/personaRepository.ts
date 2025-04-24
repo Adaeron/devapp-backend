@@ -1,9 +1,10 @@
 import { Genero } from '../interfaces/Genero';
 import { Persona, withId } from '../interfaces/Persona';
 import { auto1, auto2 } from './autoRepository';
+import { randomUUID } from 'crypto';
 
 export const nesa: withId<Persona> = {
-    _id: crypto.randomUUID(),
+    _id: randomUUID(),
     nombre: 'Camila',
     apellido: 'Rojas',
     dni: '24498178',
@@ -14,7 +15,7 @@ export const nesa: withId<Persona> = {
 };
 
 export const sebastian: withId<Persona> = {
-    _id: crypto.randomUUID(),
+    _id: randomUUID(),
     nombre: 'Sebastián',
     apellido: 'Milanesi',
     dni: '36635028',
