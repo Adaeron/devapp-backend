@@ -1,8 +1,9 @@
 import { Auto } from '../interfaces/Auto';
 import { Persona, withId } from '../interfaces/Persona';
+import { randomUUID } from 'crypto';
 
 export const auto1: withId<Auto> = {
-    _id: crypto.randomUUID(),
+    _id: randomUUID(),
     marca: 'Ford',
     modelo: 'Focus',
     color: 'Azul',
@@ -14,7 +15,7 @@ export const auto1: withId<Auto> = {
 };
 
 export const auto2: withId<Auto> = {
-    _id: crypto.randomUUID(),
+    _id: randomUUID(),
     marca: 'Fiat',
     modelo: 'Palio',
     anio: 2005,
