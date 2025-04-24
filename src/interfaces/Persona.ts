@@ -1,5 +1,4 @@
 import { Genero } from './Genero';
-import { Auto } from './Auto';
 
 export interface Persona {
     nombre: string;
@@ -8,5 +7,9 @@ export interface Persona {
     fechaDeNacimiento: Date;
     genero: Genero;
     esDonante: boolean;
-    autos: Auto[];
+    autos: UUID[];
 }
+
+export type UUID = string;
+
+export type withId<T> = T & { _id: UUID };

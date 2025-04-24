@@ -6,4 +6,5 @@ export interface Auto {
     color: string;
     numeroChasis: string;
     motor: string;
+    duenio: string;
 }
