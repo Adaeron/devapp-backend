@@ -4,6 +4,7 @@ import { Persona, UUID, withId } from '../interfaces/Persona';
 import { autoRepository } from '../repository/autoRepository';
 import { personaRepository } from '../repository/personaRepository';
 import { findByDni } from './personaService';
+import { randomUUID } from 'crypto';
 
 export function buscarAutos(dni?: string): AutoDto[] | undefined {
     const persona = findByDni(dni!);
@@ -41,7 +42,7 @@ export function agregarAutoAPersona(auto: withId<Auto>, persona: withId<Persona>
 }
 
 export function crearAuto(auto: Auto, duenio: withId<Persona>): withId<Auto> {
-    const _id = crypto.randomUUID();
+    const _id = randomUUID();
     const autoConId = { ...auto, _id };
     autoRepository.addAuto(autoConId);
     agregarAutoAPersona(autoConId, duenio!);

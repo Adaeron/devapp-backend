@@ -23,5 +23,4 @@ app.use('/', routes);
 // Levantamos el servidor en el puerto que configuramos
 app.listen(port, () => {
     console.log(`Example app listening on port ${port}`);
-    console.log(process.env);
 });

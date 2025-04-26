@@ -57,7 +57,7 @@ export const personaController = {
 
     // Add
     addPersona: (req: Request, res: Response) => {
-        const existe = buscarPersona(req.body.id);
+        const existe = findByDni(req.body.dni);
         const newPersonaData = { ...req.body };
         if (!existe && esPersonaValida(newPersonaData)) {
             const newPersona: Persona = { ...req.body };

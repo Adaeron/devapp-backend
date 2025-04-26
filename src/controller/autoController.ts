@@ -56,7 +56,6 @@ export const autoController = {
     //Add
     addAuto: (req: Request, res: Response) => {
         const newAuto = { ...req.body };
-        console.log(newAuto);
         const duenio = findByDni(newAuto.duenio);
         const existeEnElDuenio = existeAutoEnDuenio(newAuto.dni, duenio!);
         if (esAutoValido(newAuto) && !existeEnElDuenio) {

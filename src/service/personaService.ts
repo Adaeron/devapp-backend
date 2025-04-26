@@ -2,6 +2,7 @@ import { Persona, UUID, withId } from '../interfaces/Persona';
 import { PersonaDto } from '../interfaces/PersonaDto';
 import { personaRepository } from '../repository/personaRepository';
 import { eliminarAutosDePersona } from './autoService';
+import { randomUUID } from 'crypto';
 
 export function buscarPersonas(): PersonaDto[] {
     const personas = personaRepository.getAll();
@@ -33,7 +34,7 @@ export function editarPersona(persona: withId<Persona>, editData: Partial<Person
 }
 
 export function crearPersona(persona: Persona) {
-    const _id = crypto.randomUUID();
+    const _id = randomUUID();
     const personaConId: withId<Persona> = { ...persona, _id };
     personaRepository.addPersona(personaConId);
 }
