@@ -1,6 +1,6 @@
-import { Auto } from '../interfaces/Auto';
-import { Genero } from '../interfaces/Genero';
-import { Persona } from '../interfaces/Persona';
+import { Auto } from '../model/Auto';
+import { Genero } from '../model/Genero';
+import { Persona } from '../model/Persona';
 
 export function esDatoValido(dato: unknown, tipo: string) {
     return typeof dato === tipo;
