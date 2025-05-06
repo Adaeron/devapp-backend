@@ -2,7 +2,7 @@ import { esPersonaEditValida, esPersonaValida } from '../aux/auxiliares';
 import { EntityNotFoundError, InvalidDataError } from '../errors/errors';
 import { Persona, UUID, withId } from '../model/Persona';
 import { PersonaDto } from '../model/PersonaDto';
-import { personaRepository } from '../repositories/personaRepository';
+import { personaRepository } from '../repositories/persona/personaRepository';
 import { eliminarAutosDePersona } from './autoService';
 import { randomUUID } from 'crypto';
 

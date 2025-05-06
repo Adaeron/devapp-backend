@@ -3,8 +3,8 @@ import { EntityNotFoundError, InvalidDataError } from '../errors/errors';
 import { Auto } from '../model/Auto';
 import { AutoDto } from '../model/AutoDto';
 import { Persona, UUID, withId } from '../model/Persona';
-import { autoRepository } from '../repositories/autoRepository';
-import { personaRepository } from '../repositories/personaRepository';
+import { autoRepository } from '../repositories/auto/autoRepository';
+import { personaRepository } from '../repositories/persona/personaRepository';
 import { findByDni } from './personaService';
 import { randomUUID } from 'crypto';
 
@@ -74,7 +74,7 @@ export function editarAuto(idAuto: UUID, editData: Partial<Auto>) {
 export function eliminarAuto(idAuto: UUID) {
     const autoAEliminar = autoRepository.getById(idAuto);
     if (!autoAEliminar) {
-        throw new Error('No se puede encontrar el auto.');
+        throw new EntityNotFoundError();
     }
     autoRepository.deleteAuto(autoAEliminar._id);
 }
