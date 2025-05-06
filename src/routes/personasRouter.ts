@@ -1,5 +1,5 @@
 import { Router } from 'express';
-import { personaController } from '../controller/personaController';
+import { personaController } from '../controllers/personaController';
 
 export const personasRouter = Router();
 

@@ -1,5 +1,5 @@
-import { Auto } from '../interfaces/Auto';
-import { Persona, withId } from '../interfaces/Persona';
+import { Auto } from '../model/Auto';
+import { Persona, withId } from '../model/Persona';
 import { randomUUID } from 'crypto';
 
 export const auto1: withId<Auto> = {
@@ -42,15 +42,15 @@ export const autoRepository = {
     },
     addAuto: (auto: withId<Auto>) => {
         autos.push(auto);
+        return auto._id;
     },
     deleteAuto: (id: string) => {
         const index = autos.findIndex((auto) => auto._id === id);
         autos.splice(index, 1);
     },
     deleteFromPersona: (persona: withId<Persona>) => {
-        const idDuenio = persona._id;
         for (let i = autos.length - 1; i >= 0; i--) {
-            if (autos[i].duenio === idDuenio) {
+            if (autos[i].duenio === persona.dni) {
                 autos.splice(i, 1);
             }
         }

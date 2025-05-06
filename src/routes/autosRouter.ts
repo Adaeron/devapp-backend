@@ -1,5 +1,5 @@
 import { Router } from 'express';
-import { autoController } from '../controller/autoController';
+import { autoController } from '../controllers/autoController';
 
 export const autosRouter = Router();
 

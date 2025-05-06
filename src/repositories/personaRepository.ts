@@ -1,5 +1,5 @@
-import { Genero } from '../interfaces/Genero';
-import { Persona, withId } from '../interfaces/Persona';
+import { Genero } from '../model/Genero';
+import { Persona, withId } from '../model/Persona';
 import { auto1, auto2 } from './autoRepository';
 import { randomUUID } from 'crypto';
 

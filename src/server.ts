@@ -17,6 +17,8 @@ app.use(cors());
 app.use(helmet());
 app.use(bodyParser.json());
 
+//TODO: Agregar middlewares a servidor.
+
 // routes
 app.use('/', routes);
 
