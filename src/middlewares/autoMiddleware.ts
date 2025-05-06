@@ -1,5 +1,5 @@
 import { NextFunction, Request, Response } from 'express';
-import { autoRepository } from '../repositories/autoRepository';
+import { autoRepository } from '../repositories/auto/autoRepository';
 
 export const findAutoHandler = (req: Request, res: Response, next: NextFunction) => {
     const id = req.params.id;

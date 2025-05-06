@@ -1,5 +1,5 @@
 import { NextFunction, Request, Response } from 'express';
-import { personaRepository } from '../repositories/personaRepository';
+import { personaRepository } from '../repositories/persona/personaRepository';
 
 export const findPersonaHandler = (req: Request, res: Response, next: NextFunction) => {
     const id = req.params.id;

@@ -1,7 +1,7 @@
-import { Genero } from '../model/Genero';
-import { Persona, withId } from '../model/Persona';
-import { auto1, auto2 } from './autoRepository';
+import { Genero } from '../../model/Genero';
+import { Persona, withId } from '../../model/Persona';
 import { randomUUID } from 'crypto';
+import { auto1, auto2 } from '../auto/autoTransientRepository';
 
 export const nesa: withId<Persona> = {
     _id: randomUUID(),
@@ -27,7 +27,7 @@ export const sebastian: withId<Persona> = {
 
 export const personas = [sebastian, nesa];
 
-export const personaRepository = {
+export const mongoPersonaRepository = {
     getAll: (): withId<Persona>[] => {
         return personas;
     },
