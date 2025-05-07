@@ -28,7 +28,7 @@ export const auto2: withId<Auto> = {
 
 const autos = [auto1, auto2];
 
-export const transientAutoRepository = {
+export const MongoAutoRepository = {
     getAll: (): withId<Auto>[] => {
         return autos;
     },

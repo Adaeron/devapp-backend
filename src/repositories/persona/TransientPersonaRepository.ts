@@ -1,6 +1,6 @@
 import { Genero } from '../../model/Genero';
 import { Persona, withId } from '../../model/Persona';
-import { auto1, auto2 } from '../auto/autoTransientRepository';
+import { auto1, auto2 } from '../auto/TransientAutoRepository';
 import { randomUUID } from 'crypto';
 
 export const nesa: withId<Persona> = {
@@ -27,7 +27,7 @@ export const sebastian: withId<Persona> = {
 
 export const personas = [sebastian, nesa];
 
-export const transientPersonaRepository = {
+export const TransientPersonaRepository = {
     getAll: (): withId<Persona>[] => {
         return personas;
     },

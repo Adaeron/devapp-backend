@@ -1,24 +1,17 @@
 import { Request, Response } from 'express';
 import { Persona } from '../model/Persona';
-import {
-    borrarPersona,
-    buscarPersona,
-    buscarPersonas,
-    crearPersona,
-    editarPersona,
-    findByDni
-} from '../services/personaService';
-import { EntityNotFoundError, InvalidDataError } from '../errors/errors';
+import { PersonaService } from '../services/PersonaService';
+import { EntityNotFoundError, InvalidDataError } from '../errors/Errors';
 
-export const personaController = {
+export const PersonaController = {
     // Browse
     getAll: (req: Request, res: Response) => {
         let resData;
         const dniPersona = req.query.dni?.toString();
         if (req.query.dni) {
-            resData = findByDni(dniPersona!);
+            resData = PersonaService.findByDni(dniPersona!);
         } else {
-            resData = buscarPersonas();
+            resData = PersonaService.buscarPersonas();
         }
         res.json(resData);
     },
@@ -27,7 +20,7 @@ export const personaController = {
     getPersonaById: (req: Request, res: Response) => {
         const id = req.params.id;
         try {
-            const persona = buscarPersona(id);
+            const persona = PersonaService.buscarPersona(id);
             res.json(persona);
         } catch (error) {
             if (error instanceof EntityNotFoundError) {
@@ -41,7 +34,7 @@ export const personaController = {
         const personaId = req.params.id;
         const editData: Partial<Persona> = req.body;
         try {
-            const personaEditada = editarPersona(personaId, editData);
+            const personaEditada = PersonaService.editarPersona(personaId, editData);
             res.status(201).send(personaEditada);
         } catch (error) {
             if (error instanceof InvalidDataError) {
@@ -54,7 +47,7 @@ export const personaController = {
     addPersona: (req: Request, res: Response) => {
         try {
             const newPersonaData = { ...req.body };
-            const idNewPersona = crearPersona(newPersonaData);
+            const idNewPersona = PersonaService.crearPersona(newPersonaData);
             res.status(201).json(idNewPersona);
         } catch (error) {
             if (error instanceof InvalidDataError) {
@@ -67,7 +60,7 @@ export const personaController = {
     deletePersona: (req: Request, res: Response) => {
         const id = req.params.id;
         try {
-            borrarPersona(id);
+            PersonaService.borrarPersona(id);
             res.sendStatus(201);
         } catch (error) {
             if (error instanceof EntityNotFoundError) {
