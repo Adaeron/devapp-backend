@@ -38,7 +38,7 @@ export const TransientPersonaRepository = {
         return personas.find((persona) => persona.dni === dni);
     },
     editPersona: (personaAEditar: withId<Persona>): withId<Persona> => {
-        const index = personas.indexOf(personaAEditar);
+        const index = personas.findIndex((persona) => persona._id === personaAEditar._id);
         personas[index] = personaAEditar;
         return personas[index];
     },
