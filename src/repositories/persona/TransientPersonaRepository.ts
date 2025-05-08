@@ -1,6 +1,6 @@
-import { Genero } from '../model/Genero';
-import { Persona, withId } from '../model/Persona';
-import { auto1, auto2 } from './autoRepository';
+import { Genero } from '../../model/Genero';
+import { Persona, withId } from '../../model/Persona';
+import { auto1, auto2 } from '../auto/TransientAutoRepository';
 import { randomUUID } from 'crypto';
 
 export const nesa: withId<Persona> = {
@@ -27,7 +27,7 @@ export const sebastian: withId<Persona> = {
 
 export const personas = [sebastian, nesa];
 
-export const personaRepository = {
+export const TransientPersonaRepository = {
     getAll: (): withId<Persona>[] => {
         return personas;
     },
@@ -37,12 +37,12 @@ export const personaRepository = {
     getByDni: (dni: string): withId<Persona> | undefined => {
         return personas.find((persona) => persona.dni === dni);
     },
-    editPersona: (editData: Partial<Persona>, personaAEditar: withId<Persona>): withId<Persona> => {
+    editPersona: (personaAEditar: withId<Persona>): withId<Persona> => {
         const index = personas.findIndex((persona) => persona._id === personaAEditar._id);
-        personas[index] = { ...personaAEditar, ...editData };
+        personas[index] = personaAEditar;
         return personas[index];
     },
-    addPersona: (persona: withId<Persona>) => {
+    savePersona: (persona: withId<Persona>) => {
         personas.push(persona);
     },
     deletePersona: (id: string) => {

@@ -1,92 +1,73 @@
+import { InvalidDataError } from '../errors/Errors';
 import { Auto } from '../model/Auto';
 import { Genero } from '../model/Genero';
 import { Persona } from '../model/Persona';
-
-export function esDatoValido(dato: unknown, tipo: string) {
-    return typeof dato === tipo;
-}
-
-export function esDatoEditValido(dato: unknown, tipo: string) {
-    return typeof dato === tipo || typeof dato === 'undefined';
-}
-
-export function esGeneroValido(genero: Genero) {
-    return (
-        esDatoValido(genero, 'string') && (genero === 'Masculino' || genero === 'Femenino' || genero === 'No-Binario')
-    );
-}
-
-function esGeneroEditValido(genero: Genero | undefined) {
-    if (genero) {
-        return (
-            typeof genero === 'string' && (genero === 'Masculino' || genero === 'Femenino' || genero === 'No-Binario')
-        );
-    } else {
-        return esDatoEditValido(genero, 'string') || false;
-    }
-}
 
 export function esFechaValida(fecha: string) {
     const fechaParseada = new Date(fecha);
     return !isNaN(fechaParseada.valueOf()) && fechaParseada < new Date();
 }
 
-export function esFechaEditValida(fecha: string | undefined) {
-    if (fecha) {
-        const fechaParseada = new Date(fecha);
-        return (!isNaN(fechaParseada.valueOf()) && fechaParseada < new Date()) || fecha === undefined;
-    } else {
-        return fecha === undefined || false;
+export function esPersonaValida(persona: Persona): boolean {
+    if (typeof persona.nombre !== 'string' || persona.nombre.trim() === '') {
+        throw new InvalidDataError('El nombre es obligatorio y no puede estar vacío.');
     }
-}
 
-export function esPersonaValida(persona: Persona) {
-    return (
-        esDatoValido(persona.nombre, 'string') &&
-        esDatoValido(persona.apellido, 'string') &&
-        esDatoValido(persona.dni, 'string') &&
-        esDatoValido(persona.genero, 'string') &&
-        esGeneroValido(persona.genero) &&
-        esDatoValido(persona.esDonante, 'boolean') &&
-        esDatoValido(persona.autos, 'object') &&
-        esFechaValida(persona.fechaDeNacimiento.toString())
-    );
-}
+    if (typeof persona.apellido !== 'string' || persona.apellido.trim() === '') {
+        throw new InvalidDataError('El apellido es obligatorio y no puede estar vacío.');
+    }
 
-export function esPersonaEditValida(persona: Partial<Persona>) {
-    return (
-        esDatoEditValido(persona.nombre, 'string') &&
-        esDatoEditValido(persona.apellido, 'string') &&
-        esDatoEditValido(persona.dni, 'string') &&
-        esGeneroEditValido(persona.genero!) &&
-        esDatoEditValido(persona.esDonante, 'boolean') &&
-        esDatoEditValido(persona.autos, 'object') &&
-        esFechaEditValida(persona.fechaDeNacimiento?.toString())
-    );
+    if (typeof persona.dni !== 'string' || !/^\d{7,9}$/.test(persona.dni)) {
+        throw new InvalidDataError('El DNI debe ser un string de 7 a 9 dígitos.');
+    }
+
+    if (!esFechaValida(persona.fechaDeNacimiento.toString())) {
+        throw new InvalidDataError('La fecha de nacimiento debe ser una fecha válida.');
+    } else if (persona.fechaDeNacimiento > new Date()) {
+        throw new InvalidDataError('La fecha de nacimiento no puede ser en el futuro.');
+    }
+
+    if (!Object.values(Genero).includes(persona.genero)) {
+        throw new InvalidDataError('El género debe ser uno de los valores permitidos.');
+    }
+
+    if (typeof persona.esDonante !== 'boolean') {
+        throw new InvalidDataError(`El valor de 'esDonante' debe ser booleano.`);
+    }
+
+    if (!Array.isArray(persona.autos)) {
+        throw new InvalidDataError(`El campo 'autos' debe ser un arreglo.`);
+    }
+    return true;
 }
 
 export function esAutoValido(auto: Auto) {
-    return (
-        esDatoValido(auto.marca, 'string') &&
-        esDatoValido(auto.modelo, 'string') &&
-        esDatoValido(auto.anio, 'number') &&
-        esDatoValido(auto.color, 'string') &&
-        esDatoValido(auto.patente, 'string') &&
-        esDatoValido(auto.motor, 'string') &&
-        esDatoValido(auto.numeroChasis, 'string') &&
-        esDatoValido(auto.duenio, 'string')
-    );
-}
+    if (typeof auto.marca !== 'string' || auto.marca.trim() === '') {
+        throw new InvalidDataError('La marca es obligatorio y no puede estar vacía.');
+    }
 
-export function esAutoEditValido(auto: Partial<Auto>) {
-    return (
-        esDatoEditValido(auto.marca, 'string') &&
-        esDatoEditValido(auto.modelo, 'string') &&
-        esDatoEditValido(auto.anio, 'number') &&
-        esDatoEditValido(auto.color, 'string') &&
-        esDatoEditValido(auto.patente, 'string') &&
-        esDatoEditValido(auto.motor, 'string') &&
-        esDatoEditValido(auto.numeroChasis, 'string') &&
-        esDatoEditValido(auto.duenio, 'string')
-    );
+    if (typeof auto.modelo !== 'string' || auto.modelo.trim() === '') {
+        throw new InvalidDataError('El modelo es obligatorio y no puede estar vacío.');
+    }
+
+    if (typeof auto.patente !== 'string' || auto.patente.trim() === '') {
+        throw new InvalidDataError('La patente es obligatoria y no puede estar vacía.');
+    }
+
+    if (typeof auto.anio !== 'number' || auto.anio < 1900) {
+        throw new InvalidDataError('El año debe ser mayor a 1900.');
+    }
+
+    if (typeof auto.color !== 'string' || auto.color.trim() === '') {
+        throw new InvalidDataError('El color es obligatorio y no puede estar vacío.');
+    }
+
+    if (typeof auto.motor !== 'string') {
+        throw new InvalidDataError(`El número de motor es obligatorio y no puede estar vacío.`);
+    }
+
+    if (typeof auto.numeroChasis !== 'string' || auto.numeroChasis.trim() === '') {
+        throw new InvalidDataError(`El número de chasis es obligatorio y no puede estar vacío.`);
+    }
+    return true;
 }
