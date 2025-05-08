@@ -1,4 +1,3 @@
-import { esAutoEditValido, esAutoValido } from '../aux/auxiliares';
 import { EntityNotFoundError, InvalidDataError } from '../errors/Errors';
 import { Auto } from '../model/Auto';
 import { AutoDto } from '../model/AutoDto';
@@ -19,14 +18,11 @@ export const AutoService = {
         };
     },
     buscarAutos: (dni?: string): AutoDto[] => {
-        const persona = PersonaService.findByDni(dni!);
-        const autos = Array<withId<Auto>>();
-        persona?.autos.forEach((id) => autos.push(AutoRepository.getById(id)!));
-        if (persona) {
-            return autos?.map((auto) => AutoService.toDto(auto));
-        } else {
-            return AutoRepository.getAll().map((auto) => AutoService.toDto(auto));
+        const autos = AutoRepository.getAll();
+        if (dni) {
+            return autos.filter((auto) => auto.duenio === dni).map((auto) => AutoService.toDto(auto));
         }
+        return autos.map((auto) => AutoService.toDto(auto));
     },
     buscarAuto: (idAuto: UUID) => {
         const auto = AutoRepository.getById(idAuto);
@@ -43,35 +39,23 @@ export const AutoService = {
         const _id = randomUUID();
         const autoConId = { ...auto, _id };
         const existeEnElDuenio = AutoService.existeAutoEnDuenio(autoConId._id, duenio!);
-        if (esAutoValido(autoConId) && !existeEnElDuenio) {
-            const autoId = AutoRepository.addAuto(autoConId);
-            AutoService.agregarAutoAPersona(autoConId, duenio!);
-            return autoId;
+        const existePatente = AutoService.existePatente(autoConId);
+        if (existeEnElDuenio) {
+            throw new InvalidDataError('El auto ya existe en el dueño.');
         }
-        if (!esAutoValido(autoConId)) {
-            throw new InvalidDataError();
+        if (existePatente) {
+            throw new InvalidDataError('Ya existe un auto con esta patente.');
         }
+        const autoId = AutoRepository.addAuto(autoConId);
+        AutoService.agregarAutoAPersona(autoConId, duenio!);
+        return autoId;
     },
-    editarAuto: (idAuto: UUID, editData: Partial<Auto>) => {
-        const autoAEditar = AutoRepository.getById(idAuto);
-
-        if (autoAEditar && esAutoEditValido(editData)) {
-            const autoEditado = AutoRepository.editAuto(editData, autoAEditar);
-            return autoEditado;
-        }
-        if (!esAutoEditValido(editData)) {
-            throw new InvalidDataError();
-        }
-        if (!autoAEditar) {
-            throw new EntityNotFoundError();
-        }
+    editarAuto: (auto: withId<Auto>): withId<Auto> => {
+        const autoEditado = AutoRepository.editAuto(auto);
+        return autoEditado;
     },
-    eliminarAuto: (idAuto: UUID) => {
-        const autoAEliminar = AutoRepository.getById(idAuto);
-        if (!autoAEliminar) {
-            throw new EntityNotFoundError();
-        }
-        AutoRepository.deleteAuto(autoAEliminar._id);
+    eliminarAuto: (auto: withId<Auto>) => {
+        AutoRepository.deleteAuto(auto._id);
     },
     eliminarAutosDePersona: (persona: withId<Persona>) => {
         AutoRepository.deleteFromPersona(persona);
@@ -90,5 +74,8 @@ export const AutoService = {
     },
     existeAutoEnDuenio: (idAuto: string, persona: withId<Persona>) => {
         return persona.autos.find((id) => id === idAuto);
+    },
+    existePatente: (auto: withId<Auto>): withId<Auto> | undefined => {
+        return AutoRepository.getByPatente(auto.patente);
     }
 };

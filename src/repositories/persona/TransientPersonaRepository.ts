@@ -37,12 +37,12 @@ export const TransientPersonaRepository = {
     getByDni: (dni: string): withId<Persona> | undefined => {
         return personas.find((persona) => persona.dni === dni);
     },
-    editPersona: (editData: Partial<Persona>, personaAEditar: withId<Persona>): withId<Persona> => {
-        const index = personas.findIndex((persona) => persona._id === personaAEditar._id);
-        personas[index] = { ...personaAEditar, ...editData };
+    editPersona: (personaAEditar: withId<Persona>): withId<Persona> => {
+        const index = personas.indexOf(personaAEditar);
+        personas[index] = personaAEditar;
         return personas[index];
     },
-    addPersona: (persona: withId<Persona>) => {
+    savePersona: (persona: withId<Persona>) => {
         personas.push(persona);
     },
     deletePersona: (id: string) => {

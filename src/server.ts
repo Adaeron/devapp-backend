@@ -5,6 +5,8 @@ import helmet from 'helmet';
 import process from 'process';
 import { routes } from './routes/routes';
 import bodyParser from 'body-parser';
+import { ErrorHandler } from './middlewares/ErrorHandler';
+import { SetupRequestContext } from './middlewares/SetupRequestContext';
 
 // Creamos nuestra app express
 const app = express();
@@ -17,10 +19,14 @@ app.use(cors());
 app.use(helmet());
 app.use(bodyParser.json());
 
-//TODO: Agregar middlewares a servidor.
+//Middleware que setea un context al Request.
+app.use(SetupRequestContext);
 
 // routes
 app.use('/', routes);
+
+//Error Handler
+app.use(ErrorHandler);
 
 // Levantamos el servidor en el puerto que configuramos
 app.listen(port, () => {

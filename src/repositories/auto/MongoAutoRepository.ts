@@ -35,9 +35,9 @@ export const MongoAutoRepository = {
     getById: (id: string): withId<Auto> | undefined => {
         return autos.find((auto) => auto._id === id);
     },
-    editAuto: (editData: Partial<Auto>, autoAEditar: withId<Auto>): withId<Auto> => {
-        const index = autos.findIndex((auto) => auto._id === autoAEditar._id);
-        autos[index] = { ...autoAEditar, ...editData };
+    editAuto: (auto: withId<Auto>): withId<Auto> => {
+        const index = autos.indexOf(auto);
+        autos[index] = auto;
         return autos[index];
     },
     addAuto: (auto: withId<Auto>) => {
@@ -54,5 +54,8 @@ export const MongoAutoRepository = {
                 autos.splice(i, 1);
             }
         }
+    },
+    getByPatente: (patente: string) => {
+        return autos.find((auto) => auto.patente === patente);
     }
 };

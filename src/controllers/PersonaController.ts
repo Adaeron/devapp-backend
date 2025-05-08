@@ -1,7 +1,6 @@
-import { Request, Response } from 'express';
-import { Persona } from '../model/Persona';
+import { NextFunction, Request, Response } from 'express';
+import { Persona, withId } from '../model/Persona';
 import { PersonaService } from '../services/PersonaService';
-import { EntityNotFoundError, InvalidDataError } from '../errors/Errors';
 
 export const PersonaController = {
     // Browse
@@ -17,55 +16,33 @@ export const PersonaController = {
     },
 
     // Read
-    getPersonaById: (req: Request, res: Response) => {
-        const id = req.params.id;
-        try {
-            const persona = PersonaService.buscarPersona(id);
-            res.json(persona);
-        } catch (error) {
-            if (error instanceof EntityNotFoundError) {
-                res.status(404).send(error.message);
-            }
-        }
+    getPersonaById: (req: Request<{ id: string }, withId<Persona>>, res: Response, next: NextFunction) => {
+        const persona = req.context.persona;
+        res.status(200).json(persona);
+        next();
     },
 
     // Edit
-    editPersona: (req: Request, res: Response) => {
-        const personaId = req.params.id;
-        const editData: Partial<Persona> = req.body;
-        try {
-            const personaEditada = PersonaService.editarPersona(personaId, editData);
-            res.status(201).send(personaEditada);
-        } catch (error) {
-            if (error instanceof InvalidDataError) {
-                res.status(400).send(error.message);
-            }
-        }
+    editPersona: (req: Request, res: Response, next: NextFunction) => {
+        const persona = req.context.persona;
+        const personaEditada = PersonaService.editarPersona(persona);
+        res.status(200).json(personaEditada);
+        next();
     },
 
     // Add
-    addPersona: (req: Request, res: Response) => {
-        try {
-            const newPersonaData = { ...req.body };
-            const idNewPersona = PersonaService.crearPersona(newPersonaData);
-            res.status(201).json(idNewPersona);
-        } catch (error) {
-            if (error instanceof InvalidDataError) {
-                res.status(400).send(error.message);
-            }
-        }
+    addPersona: (req: Request, res: Response, next: NextFunction) => {
+        const persona = req.context.persona;
+        const idNuevaPersona = PersonaService.crearPersona(persona);
+        res.status(200).json(idNuevaPersona);
+        next();
     },
 
     // Delete
-    deletePersona: (req: Request, res: Response) => {
-        const id = req.params.id;
-        try {
-            PersonaService.borrarPersona(id);
-            res.sendStatus(201);
-        } catch (error) {
-            if (error instanceof EntityNotFoundError) {
-                res.status(404).json(error.message);
-            }
-        }
+    deletePersona: (req: Request, res: Response, next: NextFunction) => {
+        const persona = req.context.persona;
+        PersonaService.borrarPersona(persona);
+        res.sendStatus(200).json();
+        next();
     }
 };

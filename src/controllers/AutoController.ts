@@ -1,7 +1,5 @@
 import { AutoService } from '../services/AutoService';
-import { Auto } from '../model/Auto';
-import { Request, Response } from 'express';
-import { EntityNotFoundError, InvalidDataError } from '../errors/Errors';
+import { NextFunction, Request, Response } from 'express';
 
 export const AutoController = {
     //Browse
@@ -17,59 +15,32 @@ export const AutoController = {
     },
 
     //Read
-    getAutoById: (req: Request, res: Response) => {
-        const idAuto = req.params.id;
-        try {
-            const auto = AutoService.buscarAuto(idAuto);
-            res.json(auto);
-        } catch (error) {
-            if (error instanceof EntityNotFoundError) {
-                res.status(404).send(error.message);
-            }
-        }
+    getAutoById: (req: Request, res: Response, next: NextFunction) => {
+        const auto = req.context.auto;
+        res.status(200).json(auto);
+        next();
     },
 
     //Edit
-    editAuto: (req: Request, res: Response) => {
-        const autoId = req.params.id;
-        const autoEditData: Partial<Auto> = req.body;
-        try {
-            const autoEditado = AutoService.editarAuto(autoId, autoEditData);
-            res.status(201).json(autoEditado);
-        } catch (error) {
-            if (error instanceof EntityNotFoundError) {
-                res.status(404).send(error.message);
-            }
-            if (error instanceof InvalidDataError) {
-                res.status(400).send(error.message);
-            }
-        }
+    editAuto: (req: Request, res: Response, next: NextFunction) => {
+        const auto = req.context.auto;
+        const autoEditado = AutoService.editarAuto(auto);
+        res.status(200).json(autoEditado);
+        next();
     },
 
     //Add
     addAuto: (req: Request, res: Response) => {
-        const newAuto = { ...req.body };
-        try {
-            const nuevoAutoId = AutoService.crearAuto(newAuto);
-            res.status(201).json(nuevoAutoId);
-        } catch (error) {
-            if (error instanceof InvalidDataError) {
-                res.status(400).send(error.message);
-            }
-        }
+        const newAuto = req.context.auto;
+        const idNuevoAuto = AutoService.crearAuto(newAuto);
+        res.status(201).json(idNuevoAuto);
     },
 
     //Delete
-    deleteAuto: (req: Request, res: Response) => {
-        const idAuto = req.params.id;
-        try {
-            AutoService.eliminarAutoAPersona(idAuto);
-            AutoService.eliminarAuto(idAuto);
-            res.sendStatus(201);
-        } catch (error) {
-            if (error instanceof EntityNotFoundError) {
-                res.status(404).send(error.message);
-            }
-        }
+    deleteAuto: (req: Request, res: Response, next: NextFunction) => {
+        const auto = req.context.auto;
+        AutoService.eliminarAuto(auto);
+        res.status(200).json();
+        next();
     }
 };

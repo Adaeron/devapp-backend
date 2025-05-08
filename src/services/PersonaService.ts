@@ -1,4 +1,3 @@
-import { esPersonaEditValida, esPersonaValida } from '../aux/auxiliares';
 import { EntityNotFoundError, InvalidDataError } from '../errors/Errors';
 import { Persona, UUID, withId } from '../model/Persona';
 import { PersonaDto } from '../model/PersonaDto';
@@ -30,35 +29,22 @@ export const PersonaService = {
         const personaEncontrada = PersonaRepository.getByDni(dni);
         return personaEncontrada;
     },
-    editarPersona: (id: UUID, editData: Partial<Persona>) => {
-        const personaAEditar = PersonaRepository.getById(id);
-        if (esPersonaEditValida(editData) && personaAEditar) {
-            const personaEditada = PersonaRepository.editPersona(editData, personaAEditar);
-            return personaEditada;
-        }
-        if (!esPersonaEditValida(editData)) {
-            throw new InvalidDataError();
-        }
-        if (!personaAEditar) {
-            throw new EntityNotFoundError();
-        }
+    editarPersona: (persona: withId<Persona>) => {
+        const personaEditada = PersonaRepository.editPersona(persona);
+        return personaEditada;
     },
-    crearPersona: (persona: Persona) => {
+    crearPersona: (persona: Persona): string => {
+        const _id = randomUUID();
+        const personaConId = { _id, ...persona };
         const existe = PersonaService.findByDni(persona.dni);
-        if (!existe && esPersonaValida(persona)) {
-            const _id = randomUUID();
-            const personaConId: withId<Persona> = { ...persona, _id };
-            PersonaRepository.addPersona(personaConId);
-            return personaConId._id;
+        if (existe) {
+            throw new InvalidDataError(`Ya existe una persona con el DNI: ${persona.dni}`);
         }
-        throw new InvalidDataError();
+        PersonaRepository.savePersona(personaConId);
+        return _id;
     },
-    borrarPersona: (id: UUID) => {
-        const personaEncontrada = PersonaRepository.getById(id);
-        if (!personaEncontrada) {
-            throw new EntityNotFoundError();
-        }
-        AutoService.eliminarAutosDePersona(personaEncontrada);
-        PersonaRepository.deletePersona(id);
+    borrarPersona: (persona: withId<Persona>) => {
+        AutoService.eliminarAutosDePersona(persona);
+        PersonaRepository.deletePersona(persona._id);
     }
 };
