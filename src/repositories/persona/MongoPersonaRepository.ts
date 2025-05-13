@@ -1,52 +1,36 @@
-import { Genero } from '../../model/Genero';
-import { Persona, withId } from '../../model/Persona';
-import { randomUUID } from 'crypto';
-import { auto1, auto2 } from '../auto/TransientAutoRepository';
-
-export const nesa: withId<Persona> = {
-    _id: randomUUID(),
-    nombre: 'Camila',
-    apellido: 'Rojas',
-    dni: '24498178',
-    genero: Genero.Femenino,
-    fechaDeNacimiento: new Date('2003-01-30'),
-    esDonante: true,
-    autos: [auto2._id!]
-};
-
-export const sebastian: withId<Persona> = {
-    _id: randomUUID(),
-    nombre: 'Sebastián',
-    apellido: 'Milanesi',
-    dni: '36635028',
-    fechaDeNacimiento: new Date('1991-09-30'),
-    genero: Genero.Masculino,
-    esDonante: false,
-    autos: [auto1._id!]
-};
-
-export const personas = [sebastian, nesa];
+import { DbConnectionManager } from '../../db/DbConnectionManager';
+import { Persona, UUID, withId } from '../../model/Persona';
 
 export const MongoPersonaRepository = {
-    getAll: (): withId<Persona>[] => {
-        return personas;
+    getAll: async (): Promise<withId<Persona>[]> => {
+        const db = DbConnectionManager.getDb();
+        const result = await db.collection<withId<Persona>>('personas').find().toArray();
+        return result;
     },
-    getById: (id: string): withId<Persona> | undefined => {
-        return personas.find((persona) => persona._id === id);
+    getById: async (id: string): Promise<withId<Persona> | null> => {
+        const db = DbConnectionManager.getDb();
+        const result = await db.collection<withId<Persona>>('personas').findOne({ _id: id });
+        return result;
     },
-    getByDni: (dni: string): withId<Persona> | undefined => {
-        return personas.find((persona) => persona.dni === dni);
+    getByDni: async (dni: string): Promise<withId<Persona> | null> => {
+        const db = DbConnectionManager.getDb();
+        const result = await db.collection<withId<Persona>>('personas').findOne({ dni: dni });
+        return result;
     },
-    editPersona: (personaAEditar: withId<Persona>): withId<Persona> => {
-        const index = personas.indexOf(personaAEditar);
-        personas[index] = personaAEditar;
-        return personas[index];
+    editPersona: async (personaAEditar: withId<Persona>): Promise<withId<Persona> | null> => {
+        const db = DbConnectionManager.getDb();
+        const result = await db
+            .collection<withId<Persona>>('personas')
+            .findOneAndUpdate({ _id: personaAEditar._id }, { $set: personaAEditar }, { returnDocument: 'after' });
+        return result;
     },
-    savePersona: (persona: withId<Persona>) => {
-        personas.push(persona);
+    savePersona: async (persona: withId<Persona>): Promise<UUID> => {
+        const db = DbConnectionManager.getDb();
+        const result = await db.collection<withId<Persona>>('personas').insertOne(persona);
+        return result.insertedId;
     },
-    deletePersona: (id: string) => {
-        const index = personas.findIndex((persona) => persona._id === id);
-        personas.splice(index, 1);
+    deletePersona: async (id: UUID): Promise<void> => {
+        const db = DbConnectionManager.getDb();
+        await db.collection<withId<Persona>>('personas').findOneAndDelete({ _id: id });
     }
 };

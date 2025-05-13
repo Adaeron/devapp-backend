@@ -4,45 +4,61 @@ import { PersonaService } from '../services/PersonaService';
 
 export const PersonaController = {
     // Browse
-    getAll: (req: Request, res: Response) => {
+    getAll: async (req: Request, res: Response) => {
         let resData;
         const dniPersona = req.query.dni?.toString();
         if (req.query.dni) {
-            resData = PersonaService.findByDni(dniPersona!);
+            resData = await PersonaService.findByDni(dniPersona!);
         } else {
-            resData = PersonaService.buscarPersonas();
+            resData = await PersonaService.buscarPersonas();
         }
         res.json(resData);
     },
 
     // Read
     getPersonaById: (req: Request<{ id: string }, withId<Persona>>, res: Response, next: NextFunction) => {
-        const persona = req.context.persona;
-        res.status(200).json(persona);
-        next();
+        try {
+            const persona = req.context.persona;
+            res.status(200).json(persona);
+            next();
+        } catch (error) {
+            next(error);
+        }
     },
 
     // Edit
-    editPersona: (req: Request, res: Response, next: NextFunction) => {
-        const persona = req.context.persona;
-        const personaEditada = PersonaService.editarPersona(persona);
-        res.status(200).json(personaEditada);
-        next();
+    editPersona: async (req: Request, res: Response, next: NextFunction) => {
+        try {
+            const persona = req.context.persona;
+            const personaEditada = await PersonaService.editarPersona(persona);
+            res.status(200).json(personaEditada);
+            next();
+        } catch (error) {
+            next(error);
+        }
     },
 
     // Add
-    addPersona: (req: Request, res: Response, next: NextFunction) => {
-        const persona = req.context.persona;
-        const idNuevaPersona = PersonaService.crearPersona(persona);
-        res.status(200).json(idNuevaPersona);
-        next();
+    addPersona: async (req: Request, res: Response, next: NextFunction) => {
+        try {
+            const persona = req.context.persona;
+            const idNuevaPersona = await PersonaService.crearPersona(persona);
+            res.status(200).json(idNuevaPersona);
+            next();
+        } catch (error) {
+            next(error);
+        }
     },
 
     // Delete
-    deletePersona: (req: Request, res: Response, next: NextFunction) => {
-        const persona = req.context.persona;
-        PersonaService.borrarPersona(persona);
-        res.sendStatus(200).json();
-        next();
+    deletePersona: async (req: Request, res: Response, next: NextFunction) => {
+        try {
+            const persona = req.context.persona;
+            await PersonaService.borrarPersona(persona);
+            res.sendStatus(200).json();
+            next();
+        } catch (error) {
+            next(error);
+        }
     }
 };

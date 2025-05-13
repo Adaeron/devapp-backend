@@ -1,61 +1,41 @@
+import { DbConnectionManager } from '../../db/DbConnectionManager';
 import { Auto } from '../../model/Auto';
-import { Persona, withId } from '../../model/Persona';
-import { randomUUID } from 'crypto';
-
-export const auto1: withId<Auto> = {
-    _id: randomUUID(),
-    marca: 'Ford',
-    modelo: 'Focus',
-    color: 'Azul',
-    anio: 2020,
-    patente: 'AB123CD',
-    numeroChasis: 'A123123',
-    motor: '234234',
-    duenio: '36635028'
-};
-
-export const auto2: withId<Auto> = {
-    _id: randomUUID(),
-    marca: 'Fiat',
-    modelo: 'Palio',
-    anio: 2005,
-    color: 'Negro',
-    patente: 'AB234DC',
-    numeroChasis: 'C234234',
-    motor: '123123',
-    duenio: '24498178'
-};
-
-const autos = [auto1, auto2];
+import { Persona, UUID, withId } from '../../model/Persona';
 
 export const MongoAutoRepository = {
-    getAll: (): withId<Auto>[] => {
-        return autos;
+    getAll: async (): Promise<withId<Auto>[] | null> => {
+        const db = DbConnectionManager.getDb();
+        const result = await db.collection<withId<Auto>>('autos').find().toArray();
+        return result;
     },
-    getById: (id: string): withId<Auto> | undefined => {
-        return autos.find((auto) => auto._id === id);
+    getById: async (id: string): Promise<withId<Auto> | null> => {
+        const db = DbConnectionManager.getDb();
+        const result = await db.collection<withId<Auto>>('autos').findOne({ _id: id });
+        return result;
     },
-    editAuto: (auto: withId<Auto>): withId<Auto> => {
-        const index = autos.indexOf(auto);
-        autos[index] = auto;
-        return autos[index];
+    editAuto: async (auto: withId<Auto>): Promise<withId<Auto> | null> => {
+        const db = DbConnectionManager.getDb();
+        const autoEditado = await db
+            .collection<withId<Auto>>('autos')
+            .findOneAndUpdate({ _id: auto._id }, { $set: auto }, { returnDocument: 'after' });
+        return autoEditado;
     },
-    addAuto: (auto: withId<Auto>) => {
-        autos.push(auto);
-        return auto._id;
+    addAuto: async (auto: withId<Auto>): Promise<UUID | void> => {
+        const db = DbConnectionManager.getDb();
+        const autoInsertado = await db.collection<withId<Auto>>('autos').insertOne(auto);
+        return autoInsertado.insertedId;
     },
-    deleteAuto: (id: string) => {
-        const index = autos.findIndex((auto) => auto._id === id);
-        autos.splice(index, 1);
+    deleteAuto: async (id: string): Promise<void> => {
+        const db = DbConnectionManager.getDb();
+        await db.collection<withId<Auto>>('autos').deleteOne({ _id: id });
     },
-    deleteFromPersona: (persona: withId<Persona>) => {
-        for (let i = autos.length - 1; i >= 0; i--) {
-            if (autos[i].duenio === persona.dni) {
-                autos.splice(i, 1);
-            }
-        }
+    deleteFromPersona: async (persona: withId<Persona>): Promise<void> => {
+        const db = DbConnectionManager.getDb();
+        await db.collection<withId<Auto>>('autos').deleteMany({ duenio: persona.dni });
     },
-    getByPatente: (patente: string) => {
-        return autos.find((auto) => auto.patente === patente);
+    getByPatente: async (patente: string): Promise<withId<Auto> | null> => {
+        const db = DbConnectionManager.getDb();
+        const autoEncontrado = await db.collection<withId<Auto>>('autos').findOne({ patente: patente });
+        return autoEncontrado;
     }
 };
