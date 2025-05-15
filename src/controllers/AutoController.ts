@@ -52,6 +52,7 @@ export const AutoController = {
     deleteAuto: async (req: Request, res: Response, next: NextFunction) => {
         try {
             const auto = req.context.auto;
+            await AutoService.eliminarAutoAPersona(auto);
             await AutoService.eliminarAuto(auto);
             res.status(200).json();
             next();

@@ -61,9 +61,8 @@ export const AutoService = {
     eliminarAutosDePersona: async (persona: withId<Persona>): Promise<void> => {
         await AutoRepository.deleteFromPersona(persona);
     },
-    eliminarAutoAPersona: async (idAuto: UUID) => {
-        const auto = await AutoService.buscarAuto(idAuto);
-        const personaDuenia = await PersonaRepository.getByDni(auto!.duenio);
+    eliminarAutoAPersona: async (auto: withId<Auto>) => {
+        const personaDuenia = await PersonaRepository.getByDni(auto.duenio);
         if (auto && personaDuenia) {
             const autosActualizados = personaDuenia.autos.filter((autoId) => autoId !== auto._id);
             const personaActualizada = { ...personaDuenia, autos: autosActualizados };
