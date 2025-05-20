@@ -1,6 +1,7 @@
 import { Auto } from '../../model/Auto';
 import { Persona, UUID, withId } from '../../model/Persona';
 import { randomUUID } from 'crypto';
+import { iAutoRepository } from './iAutoRepository';
 
 export const auto1: withId<Auto> = {
     _id: randomUUID(),
@@ -28,11 +29,11 @@ export const auto2: withId<Auto> = {
 
 const autos = [auto1, auto2];
 
-export const TransientAutoRepository = {
+export const TransientAutoRepository: iAutoRepository<Auto> = {
     getAll: async (): Promise<withId<Auto>[]> => {
         return autos;
     },
-    getById: async (id: string): Promise<withId<Auto> | undefined> => {
+    getById: async (id: UUID): Promise<withId<Auto> | undefined> => {
         return autos.find((auto) => auto._id === id);
     },
     editAuto: async (autoEdit: withId<Auto>): Promise<withId<Auto>> => {

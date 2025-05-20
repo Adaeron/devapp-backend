@@ -1,7 +1,8 @@
 import { Genero } from '../../model/Genero';
-import { Persona, withId } from '../../model/Persona';
+import { Persona, UUID, withId } from '../../model/Persona';
 import { auto1, auto2 } from '../auto/TransientAutoRepository';
 import { randomUUID } from 'crypto';
+import { iPersonaRepository } from './iPersonaRepository';
 
 export const nesa: withId<Persona> = {
     _id: randomUUID(),
@@ -27,11 +28,11 @@ export const sebastian: withId<Persona> = {
 
 export const personas = [sebastian, nesa];
 
-export const TransientPersonaRepository = {
+export const TransientPersonaRepository: iPersonaRepository<Persona> = {
     getAll: async (): Promise<withId<Persona>[]> => {
         return personas;
     },
-    getById: async (id: string): Promise<withId<Persona> | undefined> => {
+    getById: async (id: UUID): Promise<withId<Persona> | undefined> => {
         return personas.find((persona) => persona._id === id);
     },
     getByDni: async (dni: string): Promise<withId<Persona> | undefined> => {
@@ -45,7 +46,7 @@ export const TransientPersonaRepository = {
     savePersona: async (persona: withId<Persona>): Promise<void> => {
         personas.push(persona);
     },
-    deletePersona: async (id: string): Promise<void> => {
+    deletePersona: async (id: UUID): Promise<void> => {
         const index = personas.findIndex((persona) => persona._id === id);
         personas.splice(index, 1);
     }
