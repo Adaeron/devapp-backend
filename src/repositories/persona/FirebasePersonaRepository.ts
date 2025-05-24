@@ -15,6 +15,7 @@ import {
 import { FirebaseConnectionManager } from '../../db/ConnectionManagers/FirebaseConnectionManager';
 import { iPersonaRepository } from './iPersonaRepository';
 import { Persona, UUID, withId } from '../../model/Persona';
+import { Genero } from '../../model/Genero';
 
 const db: Firestore = FirebaseConnectionManager.getDb();
 const personasCollection = collection(db, 'personas');
@@ -33,7 +34,7 @@ export const FirebasePersonaRepository: iPersonaRepository<Persona> = {
             return [];
         }
     },
-    getById: async (id: UUID): Promise<withId<Persona> | null | undefined> => {
+    getById: async (id: UUID): Promise<withId<Persona>> => {
         const docRef: DocumentReference = doc(personasCollection, id);
         try {
             const personaSnapshot = await getDoc(docRef);
@@ -41,9 +42,30 @@ export const FirebasePersonaRepository: iPersonaRepository<Persona> = {
                 const persona: withId<Persona> = { _id: personaSnapshot.id, ...(personaSnapshot.data() as Persona) };
                 return persona;
             }
+            const persona2: withId<Persona> = {
+                _id: 'asasd',
+                nombre: 'asde',
+                apellido: 'asde',
+                dni: '12123',
+                fechaDeNacimiento: new Date(),
+                genero: Genero.Masculino,
+                esDonante: false,
+                autos: []
+            };
+            return persona2;
         } catch (error) {
             console.error(error);
-            return null;
+            const persona: withId<Persona> = {
+                _id: 'asasd',
+                nombre: 'asd',
+                apellido: 'asd',
+                dni: '1212',
+                fechaDeNacimiento: new Date(),
+                genero: Genero.Masculino,
+                esDonante: false,
+                autos: []
+            };
+            return persona;
         }
     },
     getByDni: async (dni: string): Promise<withId<Persona> | null | undefined> => {

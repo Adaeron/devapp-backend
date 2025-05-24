@@ -32,6 +32,7 @@ export const TransientPersonaRepository: iPersonaRepository<Persona> = {
     getAll: async (): Promise<withId<Persona>[]> => {
         return personas;
     },
+
     getById: async (id: UUID): Promise<withId<Persona> | undefined> => {
         return personas.find((persona) => persona._id === id);
     },

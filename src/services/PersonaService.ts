@@ -19,14 +19,10 @@ export const PersonaService = {
         };
     },
     buscarPersona: async (id: UUID): Promise<withId<Persona>> => {
-        let personaEncontrada;
-        try {
-            personaEncontrada = await PersonaRepository.getById(id);
-            // if (!personaEncontrada) {
-            //     throw new EntityNotFoundError();
-            // }
-        } catch (error) {}
-
+        const personaEncontrada = await PersonaRepository.getById(id);
+        if (!personaEncontrada) {
+            throw new EntityNotFoundError();
+        }
         return personaEncontrada;
     },
     findByDni: async (dni: string): Promise<withId<Persona> | null | undefined> => {
