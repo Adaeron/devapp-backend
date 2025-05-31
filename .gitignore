@@ -3,6 +3,7 @@ node_modules/
 package.lock.json
 tsconfig.build.json
 .env
+*.log
 
 # OS generated files #
 .DS_Store

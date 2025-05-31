@@ -6,8 +6,8 @@ import { AutoService } from './AutoService';
 import { randomUUID } from 'crypto';
 
 export const PersonaService = {
-    buscarPersonas: (): PersonaDto[] => {
-        const personas = PersonaRepository.getAll();
+    buscarPersonas: async (): Promise<PersonaDto[]> => {
+        const personas = await PersonaRepository.getAll();
         return personas.map((persona) => PersonaService.toDto(persona));
     },
     toDto: (persona: withId<Persona>): withId<PersonaDto> => {
@@ -18,33 +18,33 @@ export const PersonaService = {
             dni: persona.dni
         };
     },
-    buscarPersona: (id: UUID): withId<Persona> => {
-        const personaEncontrada = PersonaRepository.getById(id);
+    buscarPersona: async (id: UUID): Promise<withId<Persona>> => {
+        const personaEncontrada = await PersonaRepository.getById(id);
         if (!personaEncontrada) {
             throw new EntityNotFoundError();
         }
         return personaEncontrada;
     },
-    findByDni: (dni: string): withId<Persona> | undefined => {
-        const personaEncontrada = PersonaRepository.getByDni(dni);
+    findByDni: async (dni: string): Promise<withId<Persona> | null | undefined> => {
+        const personaEncontrada = await PersonaRepository.getByDni(dni);
         return personaEncontrada;
     },
-    editarPersona: (persona: withId<Persona>) => {
-        const personaEditada = PersonaRepository.editPersona(persona);
+    editarPersona: async (persona: withId<Persona>) => {
+        const personaEditada = await PersonaRepository.editPersona(persona);
         return personaEditada;
     },
-    crearPersona: (persona: Persona): string => {
+    crearPersona: async (persona: Persona): Promise<string | void> => {
         const _id = randomUUID();
         const personaConId = { _id, ...persona };
-        const existe = PersonaService.findByDni(persona.dni);
+        const existe = await PersonaService.findByDni(persona.dni);
         if (existe) {
             throw new InvalidDataError(`Ya existe una persona con el DNI: ${persona.dni}`);
         }
-        PersonaRepository.savePersona(personaConId);
-        return _id;
+        const idInsertado = await PersonaRepository.savePersona(personaConId);
+        return idInsertado;
     },
-    borrarPersona: (persona: withId<Persona>) => {
-        AutoService.eliminarAutosDePersona(persona);
-        PersonaRepository.deletePersona(persona._id);
+    borrarPersona: async (persona: withId<Persona>) => {
+        await AutoService.eliminarAutosDePersona(persona);
+        await PersonaRepository.deletePersona(persona._id);
     }
 };

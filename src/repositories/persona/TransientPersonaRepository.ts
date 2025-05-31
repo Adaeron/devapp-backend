@@ -1,7 +1,8 @@
 import { Genero } from '../../model/Genero';
-import { Persona, withId } from '../../model/Persona';
+import { Persona, UUID, withId } from '../../model/Persona';
 import { auto1, auto2 } from '../auto/TransientAutoRepository';
 import { randomUUID } from 'crypto';
+import { iPersonaRepository } from './iPersonaRepository';
 
 export const nesa: withId<Persona> = {
     _id: randomUUID(),
@@ -27,25 +28,26 @@ export const sebastian: withId<Persona> = {
 
 export const personas = [sebastian, nesa];
 
-export const TransientPersonaRepository = {
-    getAll: (): withId<Persona>[] => {
+export const TransientPersonaRepository: iPersonaRepository<Persona> = {
+    getAll: async (): Promise<withId<Persona>[]> => {
         return personas;
     },
-    getById: (id: string): withId<Persona> | undefined => {
+
+    getById: async (id: UUID): Promise<withId<Persona> | undefined> => {
         return personas.find((persona) => persona._id === id);
     },
-    getByDni: (dni: string): withId<Persona> | undefined => {
+    getByDni: async (dni: string): Promise<withId<Persona> | undefined> => {
         return personas.find((persona) => persona.dni === dni);
     },
-    editPersona: (personaAEditar: withId<Persona>): withId<Persona> => {
+    editPersona: async (personaAEditar: withId<Persona>): Promise<withId<Persona>> => {
         const index = personas.findIndex((persona) => persona._id === personaAEditar._id);
         personas[index] = personaAEditar;
         return personas[index];
     },
-    savePersona: (persona: withId<Persona>) => {
+    savePersona: async (persona: withId<Persona>): Promise<void> => {
         personas.push(persona);
     },
-    deletePersona: (id: string) => {
+    deletePersona: async (id: UUID): Promise<void> => {
         const index = personas.findIndex((persona) => persona._id === id);
         personas.splice(index, 1);
     }

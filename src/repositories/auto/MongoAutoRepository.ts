@@ -1,61 +1,71 @@
+import { db } from '../../db/ConnectionManagers/MongoDBConnectionManager';
+import { DatabaseConnectionError } from '../../errors/Errors';
 import { Auto } from '../../model/Auto';
-import { Persona, withId } from '../../model/Persona';
-import { randomUUID } from 'crypto';
+import { Persona, UUID, withId } from '../../model/Persona';
+import { iAutoRepository } from './iAutoRepository';
 
-export const auto1: withId<Auto> = {
-    _id: randomUUID(),
-    marca: 'Ford',
-    modelo: 'Focus',
-    color: 'Azul',
-    anio: 2020,
-    patente: 'AB123CD',
-    numeroChasis: 'A123123',
-    motor: '234234',
-    duenio: '36635028'
-};
-
-export const auto2: withId<Auto> = {
-    _id: randomUUID(),
-    marca: 'Fiat',
-    modelo: 'Palio',
-    anio: 2005,
-    color: 'Negro',
-    patente: 'AB234DC',
-    numeroChasis: 'C234234',
-    motor: '123123',
-    duenio: '24498178'
-};
-
-const autos = [auto1, auto2];
-
-export const MongoAutoRepository = {
-    getAll: (): withId<Auto>[] => {
-        return autos;
-    },
-    getById: (id: string): withId<Auto> | undefined => {
-        return autos.find((auto) => auto._id === id);
-    },
-    editAuto: (auto: withId<Auto>): withId<Auto> => {
-        const index = autos.indexOf(auto);
-        autos[index] = auto;
-        return autos[index];
-    },
-    addAuto: (auto: withId<Auto>) => {
-        autos.push(auto);
-        return auto._id;
-    },
-    deleteAuto: (id: string) => {
-        const index = autos.findIndex((auto) => auto._id === id);
-        autos.splice(index, 1);
-    },
-    deleteFromPersona: (persona: withId<Persona>) => {
-        for (let i = autos.length - 1; i >= 0; i--) {
-            if (autos[i].duenio === persona.dni) {
-                autos.splice(i, 1);
-            }
+export const MongoAutoRepository: iAutoRepository<Auto> = {
+    getAll: async (): Promise<withId<Auto>[] | null> => {
+        try {
+            const result = await db.collection<withId<Auto>>('autos').find().toArray();
+            return result;
+        } catch (error) {
+            const errorMessage = error instanceof Error ? error.message : 'Error desconocido.';
+            throw new DatabaseConnectionError(errorMessage);
         }
     },
-    getByPatente: (patente: string) => {
-        return autos.find((auto) => auto.patente === patente);
+    getById: async (id: UUID): Promise<withId<Auto> | null> => {
+        try {
+            const result = await db.collection<withId<Auto>>('autos').findOne({ _id: id });
+            return result;
+        } catch (error) {
+            const errorMessage = error instanceof Error ? error.message : 'Error desconocido.';
+            throw new DatabaseConnectionError(errorMessage);
+        }
+    },
+    editAuto: async (auto: withId<Auto>): Promise<withId<Auto> | null> => {
+        try {
+            const autoEditado = await db
+                .collection<withId<Auto>>('autos')
+                .findOneAndUpdate({ _id: auto._id }, { $set: auto }, { returnDocument: 'after' });
+            return autoEditado;
+        } catch (error) {
+            const errorMessage = error instanceof Error ? error.message : 'Error desconocido.';
+            throw new DatabaseConnectionError(errorMessage);
+        }
+    },
+    addAuto: async (auto: withId<Auto>): Promise<UUID | void> => {
+        try {
+            const autoInsertado = await db.collection<withId<Auto>>('autos').insertOne(auto);
+            return autoInsertado.insertedId;
+        } catch (error) {
+            const errorMessage = error instanceof Error ? error.message : 'Error desconocido.';
+            throw new DatabaseConnectionError(errorMessage);
+        }
+    },
+    deleteAuto: async (id: UUID): Promise<void> => {
+        try {
+            await db.collection<withId<Auto>>('autos').deleteOne({ _id: id });
+        } catch (error) {
+            const errorMessage = error instanceof Error ? error.message : 'Error desconocido.';
+            throw new DatabaseConnectionError(errorMessage);
+        }
+    },
+    deleteFromPersona: async (persona: withId<Persona>): Promise<void> => {
+        try {
+            await db.collection<withId<Auto>>('autos').deleteMany({ duenio: persona.dni });
+        } catch (error) {
+            const errorMessage = error instanceof Error ? error.message : 'Error desconocido.';
+            throw new DatabaseConnectionError(errorMessage);
+        }
+    },
+    getByPatente: async (patente: string): Promise<withId<Auto> | null> => {
+        try {
+            const autoEncontrado = await db.collection<withId<Auto>>('autos').findOne({ patente: patente });
+            return autoEncontrado;
+        } catch (error) {
+            const errorMessage = error instanceof Error ? error.message : 'Error desconocido.';
+            throw new DatabaseConnectionError(errorMessage);
+        }
     }
 };

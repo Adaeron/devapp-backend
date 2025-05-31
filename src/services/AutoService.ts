@@ -17,65 +17,67 @@ export const AutoService = {
             duenio: auto.duenio
         };
     },
-    buscarAutos: (dni?: string): AutoDto[] => {
-        const autos = AutoRepository.getAll();
+    buscarAutos: async (dni?: string): Promise<AutoDto[]> => {
+        const autos = await AutoRepository.getAll();
         if (dni) {
-            return autos.filter((auto) => auto.duenio === dni).map((auto) => AutoService.toDto(auto));
+            return autos!.filter((auto) => auto.duenio === dni).map((auto) => AutoService.toDto(auto));
         }
-        return autos.map((auto) => AutoService.toDto(auto));
+        return autos!.map((auto) => AutoService.toDto(auto));
     },
-    buscarAuto: (idAuto: UUID) => {
-        const auto = AutoRepository.getById(idAuto);
+    buscarAuto: async (idAuto: UUID): Promise<withId<Auto> | null> => {
+        const auto = await AutoRepository.getById(idAuto);
         if (!auto) {
             throw new EntityNotFoundError();
         }
-        return AutoRepository.getById(idAuto);
+        return auto;
     },
-    agregarAutoAPersona: (auto: withId<Auto>, persona: withId<Persona>): void => {
-        persona.autos.push(auto._id);
+    agregarAutoAPersona: async (auto: withId<Auto>, persona: withId<Persona>): Promise<void> => {
+        const personaConNuevoAuto = { ...persona, autos: [...persona.autos, auto._id] };
+        await PersonaRepository.editPersona(personaConNuevoAuto);
     },
-    crearAuto: (auto: Auto) => {
-        const duenio = PersonaService.findByDni(auto.duenio);
+    crearAuto: async (auto: Auto) => {
+        const duenio = await PersonaService.findByDni(auto.duenio);
         const _id = randomUUID();
         const autoConId = { ...auto, _id };
-        const existeEnElDuenio = AutoService.existeAutoEnDuenio(autoConId._id, duenio!);
-        const existePatente = AutoService.existePatente(autoConId);
+        const existeEnElDuenio = await AutoService.existeAutoEnDuenio(autoConId._id, duenio!);
+        const existePatente = await AutoService.existePatente(autoConId);
         if (existeEnElDuenio) {
             throw new InvalidDataError('El auto ya existe en el dueño.');
         }
         if (existePatente) {
             throw new InvalidDataError('Ya existe un auto con esta patente.');
         }
-        const autoId = AutoRepository.addAuto(autoConId);
-        AutoService.agregarAutoAPersona(autoConId, duenio!);
+        const autoId = await AutoRepository.addAuto(autoConId);
+        await AutoService.agregarAutoAPersona(autoConId, duenio!);
         return autoId;
     },
-    editarAuto: (auto: withId<Auto>): withId<Auto> => {
-        const autoEditado = AutoRepository.editAuto(auto);
+    editarAuto: async (auto: withId<Auto>): Promise<withId<Auto> | null> => {
+        const autoEditado = await AutoRepository.editAuto(auto);
         return autoEditado;
     },
-    eliminarAuto: (auto: withId<Auto>) => {
-        AutoRepository.deleteAuto(auto._id);
+    eliminarAuto: async (auto: withId<Auto>): Promise<void> => {
+        await AutoRepository.deleteAuto(auto._id);
     },
-    eliminarAutosDePersona: (persona: withId<Persona>) => {
-        AutoRepository.deleteFromPersona(persona);
+    eliminarAutosDePersona: async (persona: withId<Persona>): Promise<void> => {
+        await AutoRepository.deleteFromPersona(persona);
     },
-    eliminarAutoAPersona: (idAuto: UUID) => {
-        const auto = AutoService.buscarAuto(idAuto);
-        const personaDuenia = PersonaRepository.getByDni(auto!.duenio);
+    eliminarAutoAPersona: async (auto: withId<Auto>) => {
+        const personaDuenia = await PersonaRepository.getByDni(auto.duenio);
         if (auto && personaDuenia) {
-            const indexAutoEnPersona = personaDuenia?.autos.findIndex((id) => id === auto._id);
-            personaDuenia.autos.splice(indexAutoEnPersona!, 1);
+            const autosActualizados = personaDuenia.autos.filter((autoId) => autoId !== auto._id);
+            const personaActualizada = { ...personaDuenia, autos: autosActualizados };
+            await PersonaRepository.editPersona(personaActualizada);
             return;
         }
         if (!auto) {
             throw new EntityNotFoundError();
         }
     },
-    existeAutoEnDuenio: (idAuto: string, persona: withId<Persona>) => {
+    existeAutoEnDuenio: async (idAuto: string, persona: withId<Persona>) => {
         return persona.autos.find((id) => id === idAuto);
     },
-    existePatente: (auto: withId<Auto>): withId<Auto> | undefined => {
-        return AutoRepository.getByPatente(auto.patente);
+    existePatente: async (auto: withId<Auto>): Promise<withId<Auto> | null | undefined> => {
+        const autoAEncontrar = await AutoRepository.getByPatente(auto.patente);
+        return autoAEncontrar;
     }
 };

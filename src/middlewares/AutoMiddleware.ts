@@ -3,11 +3,15 @@ import { AutoService } from '../services/AutoService';
 import { esAutoValido } from '../aux/auxiliares';
 
 export const AutoMiddleware = {
-    fetchAutoHandler: (req: Request, res: Response, next: NextFunction) => {
-        const id = req.params.id;
-        const autoAEncontrar = AutoService.buscarAuto(id);
-        req.context.auto = autoAEncontrar;
-        next();
+    fetchAutoHandler: async (req: Request, res: Response, next: NextFunction) => {
+        try {
+            const id = req.params.id;
+            const autoAEncontrar = await AutoService.buscarAuto(id);
+            req.context.auto = autoAEncontrar;
+            next();
+        } catch (error) {
+            next(error);
+        }
     },
     getEntityFromBodyHandler: (req: Request, res: Response, next: NextFunction) => {
         const auto = req.body;

@@ -3,12 +3,15 @@ import { PersonaService } from '../services/PersonaService';
 import { esPersonaValida } from '../aux/auxiliares';
 
 export const PersonaMiddleware = {
-    fetchPersonaHandler: (req: Request, res: Response, next: NextFunction) => {
-        const id = req.params.id;
-        const personaAEncontrar = PersonaService.buscarPersona(id);
-        req.context.persona = personaAEncontrar;
-
-        next();
+    fetchPersonaHandler: async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+        try {
+            const id = req.params.id;
+            const personaAEncontrar = await PersonaService.buscarPersona(id);
+            req.context.persona = personaAEncontrar;
+            next();
+        } catch (error) {
+            next(error);
+        }
     },
     getEntityFromBodyHandler: (req: Request, res: Response, next: NextFunction) => {
         const persona = req.body;
