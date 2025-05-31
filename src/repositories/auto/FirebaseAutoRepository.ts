@@ -19,6 +19,8 @@ import { FirebaseConnectionManager } from '../../db/ConnectionManagers/FirebaseC
 import { iAutoRepository } from './iAutoRepository';
 import { Auto } from '../../model/Auto';
 import { Persona, UUID, withId } from '../../model/Persona';
+import { logger } from '../../server';
+import { DatabaseConnectionError } from '../../errors/Errors';
 
 const db: Firestore = FirebaseConnectionManager.getDb();
 const autosCollection: CollectionReference = collection(db, 'autos');
@@ -33,8 +35,9 @@ export const FirebaseAutoRepository: iAutoRepository<Auto> = {
             }));
             return autosList;
         } catch (error) {
-            console.error(error);
-            return [];
+            logger.error(error);
+            const message = error instanceof Error ? error.message : 'Error desconocido';
+            throw new DatabaseConnectionError(message);
         }
     },
     getById: async (id: UUID): Promise<withId<Auto> | null> => {
@@ -44,12 +47,12 @@ export const FirebaseAutoRepository: iAutoRepository<Auto> = {
             if (autoSnapshot.exists()) {
                 const auto: withId<Auto> = { _id: autoSnapshot.id, ...(autoSnapshot.data() as Auto) };
                 return auto;
-            } else {
-                return null;
             }
-        } catch (error) {
-            console.error(error);
             return null;
+        } catch (error) {
+            logger.error(error);
+            const message = error instanceof Error ? error.message : 'Error desconocido';
+            throw new DatabaseConnectionError(message);
         }
     },
     editAuto: async (auto: withId<Auto>): Promise<withId<Auto> | null> => {
@@ -59,8 +62,9 @@ export const FirebaseAutoRepository: iAutoRepository<Auto> = {
             await updateDoc(docRef, autoWithoutId);
             return auto;
         } catch (error) {
-            console.error(error);
-            return null;
+            logger.error(error);
+            const message = error instanceof Error ? error.message : 'Error desconocido';
+            throw new DatabaseConnectionError(message);
         }
     },
     addAuto: async (auto: withId<Auto>): Promise<UUID | void> => {
@@ -70,7 +74,9 @@ export const FirebaseAutoRepository: iAutoRepository<Auto> = {
             await setDoc(docRef, autoWithoutId);
             return auto._id;
         } catch (error) {
-            console.error(error);
+            logger.error(error);
+            const message = error instanceof Error ? error.message : 'Error desconocido';
+            throw new DatabaseConnectionError(message);
         }
     },
     deleteAuto: async (id: UUID): Promise<void> => {
@@ -78,7 +84,9 @@ export const FirebaseAutoRepository: iAutoRepository<Auto> = {
         try {
             await deleteDoc(docRef);
         } catch (error) {
-            console.error(error);
+            logger.error(error);
+            const message = error instanceof Error ? error.message : 'Error desconocido';
+            throw new DatabaseConnectionError(message);
         }
     },
     deleteFromPersona: async (persona: withId<Persona>): Promise<void> => {
@@ -95,7 +103,9 @@ export const FirebaseAutoRepository: iAutoRepository<Auto> = {
                 }
             }
         } catch (error) {
-            console.error(error);
+            logger.error(error);
+            const message = error instanceof Error ? error.message : 'Error desconocido';
+            throw new DatabaseConnectionError(message);
         }
     },
     getByPatente: async (patente: string): Promise<withId<Auto> | null> => {
@@ -109,8 +119,9 @@ export const FirebaseAutoRepository: iAutoRepository<Auto> = {
                 return null;
             }
         } catch (error) {
-            console.error(error);
-            return null;
+            logger.error(error);
+            const message = error instanceof Error ? error.message : 'Error desconocido';
+            throw new DatabaseConnectionError(message);
         }
     }
 };

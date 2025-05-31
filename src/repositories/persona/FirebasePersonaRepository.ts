@@ -15,7 +15,8 @@ import {
 import { FirebaseConnectionManager } from '../../db/ConnectionManagers/FirebaseConnectionManager';
 import { iPersonaRepository } from './iPersonaRepository';
 import { Persona, UUID, withId } from '../../model/Persona';
-import { Genero } from '../../model/Genero';
+import { DatabaseConnectionError } from '../../errors/Errors';
+import { logger } from '../../server';
 
 const db: Firestore = FirebaseConnectionManager.getDb();
 const personasCollection = collection(db, 'personas');
@@ -31,10 +32,11 @@ export const FirebasePersonaRepository: iPersonaRepository<Persona> = {
             return personasList;
         } catch (error) {
             console.error(error);
-            return [];
+            const message = error instanceof Error ? error.message : 'Error desconocido';
+            throw new DatabaseConnectionError(message);
         }
     },
-    getById: async (id: UUID): Promise<withId<Persona>> => {
+    getById: async (id: UUID): Promise<withId<Persona> | null> => {
         const docRef: DocumentReference = doc(personasCollection, id);
         try {
             const personaSnapshot = await getDoc(docRef);
@@ -42,30 +44,11 @@ export const FirebasePersonaRepository: iPersonaRepository<Persona> = {
                 const persona: withId<Persona> = { _id: personaSnapshot.id, ...(personaSnapshot.data() as Persona) };
                 return persona;
             }
-            const persona2: withId<Persona> = {
-                _id: 'asasd',
-                nombre: 'asde',
-                apellido: 'asde',
-                dni: '12123',
-                fechaDeNacimiento: new Date(),
-                genero: Genero.Masculino,
-                esDonante: false,
-                autos: []
-            };
-            return persona2;
+            return null;
         } catch (error) {
-            console.error(error);
-            const persona: withId<Persona> = {
-                _id: 'asasd',
-                nombre: 'asd',
-                apellido: 'asd',
-                dni: '1212',
-                fechaDeNacimiento: new Date(),
-                genero: Genero.Masculino,
-                esDonante: false,
-                autos: []
-            };
-            return persona;
+            logger.error(error);
+            const message = error instanceof Error ? error.message : 'Error desconocido';
+            throw new DatabaseConnectionError(message);
         }
     },
     getByDni: async (dni: string): Promise<withId<Persona> | null | undefined> => {
@@ -91,8 +74,9 @@ export const FirebasePersonaRepository: iPersonaRepository<Persona> = {
             await setDoc(docRef, personaWithoutId);
             return personaAEditar;
         } catch (error) {
-            console.error(error);
-            return null;
+            logger.error(error);
+            const message = error instanceof Error ? error.message : 'Error desconocido';
+            throw new DatabaseConnectionError(message);
         }
     },
     savePersona: async (persona: withId<Persona>): Promise<UUID | void> => {
@@ -102,7 +86,9 @@ export const FirebasePersonaRepository: iPersonaRepository<Persona> = {
             await setDoc(docRef, personaWithoutId);
             return _id;
         } catch (error) {
-            console.error(error);
+            logger.error(error);
+            const message = error instanceof Error ? error.message : 'Error desconocido';
+            throw new DatabaseConnectionError(message);
         }
     },
     deletePersona: async (id: UUID): Promise<void> => {
@@ -110,7 +96,9 @@ export const FirebasePersonaRepository: iPersonaRepository<Persona> = {
         try {
             await deleteDoc(docRef);
         } catch (error) {
-            console.error(error);
+            logger.error(error);
+            const message = error instanceof Error ? error.message : 'Error desconocido';
+            throw new DatabaseConnectionError(message);
         }
     }
 };
